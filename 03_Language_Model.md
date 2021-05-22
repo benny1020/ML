@@ -1,10 +1,4 @@
----
-title: "[nlp] 언어모델 공부 기록 (draft)"
-date: 2021-02-13 23:50
-categories: nlp
----
-
-[참고문서](https://wikidocs.net/21695)를 요약 및 정리한 글임을 명시합니다.
+https://wikidocs.net/21695
 
 # 개요
 
