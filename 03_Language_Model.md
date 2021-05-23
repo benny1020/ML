@@ -105,20 +105,56 @@ $P(x_1, x_2, x_3 ... x_n) = P(x_1)P(x_2|x_1)P(x_3|x_1,x_2)...P(x_n|x_1 ... x_{n-
 ## 카운트 기반의 접근
 
 ## 카운트 기반 접근의 한계 - 희소 문제(Sparsity Problem)
+- 충분한 데이터를 관측하지 못하여 정확히 모델링하지 못하는 문제
+
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+  <mi>P</mi>
+  <mtext>(is|An adorable little boy</mtext>
+  <mo stretchy="false">)</mo>
+  <mo>=</mo>
+  <mfrac>
+    <mrow>
+      <mtext>count(An adorable little boy is</mtext>
+      <mo stretchy="false">)</mo>
+    </mrow>
+    <mrow>
+      <mtext>/ count(An adorable little boy&#xA0;</mtext>
+      <mo stretchy="false">)</mo>
+    </mrow>
+  </mfrac>
+</math>
 
 ---
 
 # N-gram 언어 모델(N-gram Language Model)
 
+## 코퍼스
+- 대량의 텍스트 데이터
+
 ## 코퍼스에서 카운트하지 못하는 경우의 감소.
+- P(is|An adorable little boy)≈ P(is|boy)
+- P(is|An adorable little boy)≈ P(is|little boy)
+- 즉, 앞에서는 An adorable little boy가 나왔을 때 is가 나올 확률을 구하기 위해서는 An adorable little boy가 나온 횟수와 An adorable little boy is가 나온 횟수를 카운트해야만 했지만, 이제는 단어의 확률을 구하고자 기준 단어의 앞 단어를 전부 포함해서 카운트하는 것이 아니라, 앞 단어 중 임의의 개수만 포함해서 카운트하여 근사하자는 것입니다.
 
 ## N-gram
+- unigrams : an, adorable, little, boy, is, spreading, smiles 
+- bigrams : an adorable, adorable little, little boy, boy is, is spreading, spreading smiles
+- trigrams : an adorable little, adorable little boy, little boy is, boy is spreading, is spreading smiles
+- 4-grams : an adorable little boy, adorable little boy is, little boy is spreading, boy is spreading smiles
+
+## n-gram을 통한 언어모델에서는 다음에 나올 단어의 예측은 오직 n-1개의 단어에만 의존합니다.
+- 'An adorable little boy is spreading' 4-gram을 이용한 언어모델을 통해 다음에 나올 단어를 예측할 때 n-1개 즉, 3개의 단어 ( boy is spreading )만 고려합니다
+- 만약 갖고있는 코퍼스에서 boy is spreading가 1000번 등장했고 그 중 boy is spreading insults가 500번 boy is spreading smiles가 200번이라면 해당 모델은 확률적 선택에 따라 insults가 더 맞다고 판단합니다.
 
 ## N-gram Language Model의 한계
+- n-gram은 뒤의 단어 몇 개만 보다 보니 의도하고 싶은 대로 문장을 끝맺음하지 못하는 경우가 생깁니다. 문장을 읽다 보면 앞 부분과 뒷부분의 문맥이 전혀 연결 안 되는 경우도 생길 수 있습니다.
 
 ## 희소 문제(Sparsity Problem)
 
+
 ### n을 선택하는 것은 trade-off 문제.
+- n을 크게 선택하면 실제 훈련 코퍼스에서 해당 n-gram을 카운트할 수 있는 확률은 적어지므로 희소 문제는 점점 심각해집니다.
+- n을 작게 선택하면 훈련 코퍼스에서 카운터는 잘 되겠지만 근사의 정확도는 현실의 확률분포와 멀어집니다.
 
 ### 적용 분야(Domain)에 맞는 코퍼스의 수집
 
@@ -152,3 +188,20 @@ $P(x_1, x_2, x_3 ... x_n) = P(x_1)P(x_2|x_1)P(x_3|x_1,x_2)...P(x_n|x_1 ... x_{n-
 - 한국어는 띄어쓰기를 제대로 하지 않아도 의미가 전달되며, 띄어쓰기 규칙 또한 상대적으로 까다로운 언어이다.
 - 한국어 코퍼스는 띄어쓰기가 제대로 지켜지지 않는 경우가 많음.
 - 토큰이 제대로 분리 되지 않는채 훈련 데이터로 사용된다면 언어 모델은 제대로 동작하지 않음!
+
+---
+
+# 펄플렉서티 (Perplexity) PPL
+- 언어 모델을 평가하기 위한 내부 평가 지표
+
+- PPL은 단어의 수로 정규화(normalization) 된 테스트 데이터에 대한 확률의 역수입니다. PPL을 최소화한다는 것은 문장의 확률을 최대화하는 것과 같습니다. 문장 W의 길이가 N이라고 하였을 때의 PPL은 다음과 같습니다.
+
+- 이 언어 모델이 특정 시점에서 평균적으로 몇 개의 선택지를 가지고 고민하고 있는지를 의미합니다.
+- PPL=10 -> 모든 시점마다 평균적으로 10개의 단어를 가지고 어떤 것이 정답인지 고민하고 있다.
+- 즉, PPL이 더 낮은 언어 모델의 성능이 더 좋습니다.
+- 테스트 데이터 상에서 높은 정확도를 보인다는 것이지, 사람이 직접 느끼기에 좋은 언어 모델이라는 것을 반드시 의미하진 않습니다.
+- 언어 모델의 PPL은 테스트 데이터에 의존하므로 두 개 이상의 언어 모델을 비교할 때는 정량적으로 양이 많고, 또한 도메인에 알맞은 동일한 테스트 데이터를 사용해야 신뢰도가 높습니다.
+
+
+
+# 조건부 확률
